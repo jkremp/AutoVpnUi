@@ -47,11 +47,11 @@ The VPN password is encrypted and saved in the INI-file. If the password shall b
 The shortcut initiating the actual behaviour of AutoVpnUi is save in the INI-file. If the default shortcut automated VPN password is encrypted and saved in the INI-file. If the password shall be reset the correspondent entry must be removed.
 
 Notation:
-* ^ - means CTRL key, example: ^s stands for CTRL+s
-* ! - means ALT key, example: ^!s stands for CTRL+ALT+s
-* \+ - means SHIFT key, example: +s stands for SHIFT+s
-* \# - Win key, example: \#s stands for Win+s
-* <^>! - AltGr, example <^>!s stans for AltGr+s
+* ^ - means <kbd>Ctrl</kbd> key, example: ^s stands for <kbd>Ctrl</kbd>+<kbd>s</kbd>
+* ! - means <kbd>Alt</kbd> key, example: ^!s stands for <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>s</kbd>
+* \+ - means <kbd>SHIFT</kbd> key, example: +s stands for <kbd>SHIFT</kbd>+<kbd>s</kbd>
+* \# - <kbd>Win</kbd> key, example: \#s stands for <kbd>Win</kbd>+<kbd>s</kbd>
+* <^>! - <kbd>AltGr</kbd>, example <^>!s stans for <kbd>AltGr</kbd>+<kbd>s</kbd>
 
 Many more can be found here: https://www.autohotkey.com/docs/Hotkeys.htm.
 

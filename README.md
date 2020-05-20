@@ -3,14 +3,14 @@ When triggered, AutoVpnUi automates the complete VPN connection process includin
 
 AutoVpnUi runs in the background and is either started as a script, which requires a AutoHotKey installation, or as a compiled executeable.
 
-Once AutoVpnUi is started it is waiting for shortcut pressed. This shortcut will initiate the automated VPN connection. The default shortcut is CTRL+PrintScreen.
+Once AutoVpnUi is started it is waiting for shortcut pressed. This shortcut will initiate the automated VPN connection. The default shortcut is <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd>.
 
 # How to run?
 
 * Download latest zip archive from repository
 * Unpack 
 * Start executable
-* Use preconfigured shortcut CTRL+PrintScreen
+* Use preconfigured shortcut <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd>
 * Optional: install shortcut in autostart either manually or using provided PowerShell script
 
 

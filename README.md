@@ -59,4 +59,4 @@ Many more can be found here: https://www.autohotkey.com/docs/Hotkeys.htm.
 
 * Install AutoHotkey https://www.autohotkey.com/
 * Clone repository
-* Execute AutoVpnUi.ahk script
+* Execute script `AutoVpnUi.ahk`

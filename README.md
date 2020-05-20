@@ -44,7 +44,7 @@ The VPN password is encrypted and saved in the INI-file. If the password shall b
 
 ## Shortcut
 
-The shortcut initiating the actual behaviour of AutoVpnUi is save in the INI-file. If the default shortcut automated VPN password is encrypted and saved in the INI-file. If the password shall be reset the correspondent entry must be removed.
+The shortcut initiating the actual behaviour of AutoVpnUi is saved in the INI-file. The default shortcut can be changed using following notations:
 
 Notation:
 * `^` - means <kbd>Ctrl</kbd> key, example: `^s` stands for <kbd>Ctrl</kbd>+<kbd>s</kbd>
@@ -52,8 +52,7 @@ Notation:
 * `+` - means <kbd>SHIFT</kbd> key, example: `+s` stands for <kbd>SHIFT</kbd>+<kbd>s</kbd>
 * `#` - <kbd>Win</kbd> key, example: `#s` stands for <kbd>Win</kbd>+<kbd>s</kbd>
 * `<^>!` - <kbd>AltGr</kbd>, example `<^>!s` stans for <kbd>AltGr</kbd>+<kbd>s</kbd>
-
-Many more can be found here: https://www.autohotkey.com/docs/Hotkeys.htm.
+* Many more can be found here: https://www.autohotkey.com/docs/Hotkeys.htm.
 
 # Run from source
 

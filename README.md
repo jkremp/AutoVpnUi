@@ -1,16 +1,16 @@
 # AutoVpnUi
-When triggered, AutoVpnUi automates the complete VPN connection process including entering the password. AutoVpnUi is a [AutoHotKey](https://www.autohotkey.com) script wrapping Cisco's VPN client VpnUi.exe.
+When triggered, AutoVpnUi automates the complete VPN connection process including entering the password. AutoVpnUi is a [AutoHotKey](https://www.autohotkey.com) script wrapping Cisco's VPN client `VpnUi.exe`.
 
 AutoVpnUi runs in the background and is either started as a script, which requires a AutoHotKey installation, or as a compiled executeable.
 
-Once AutoVpnUi is started it is waiting for shortcut pressed. This shortcut will initiate the automated VPN connection. The default shortcut is <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd>.
+Once AutoVpnUi is started it is waiting for a shortcut pressed. This shortcut will start the routine to automatically initiate the VPN connection and enter the password. The default shortcut is <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd>.
 
 # How to run?
 
 * Download latest zip archive from repository
 * Unpack 
 * Start executable
-* Use preconfigured shortcut <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd>
+* Use preconfigured shortcut <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd> to start login routine
 * Optional: install shortcut in autostart either manually or using provided PowerShell script
 
 

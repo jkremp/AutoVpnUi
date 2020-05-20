@@ -49,7 +49,7 @@ The shortcut initiating the actual behaviour of AutoVpnUi is save in the INI-fil
 Notation:
 * ^ - means CTRL key, example: ^s stands for CTRL+s
 * ! - means ALT key, example: ^!s stands for CTRL+ALT+s
-* + - means SHIFT key, example: +s stands for SHIFT+s
+* \+ - means SHIFT key, example: +s stands for SHIFT+s
 * \# - Win key, example: \#s stands for Win+s
 * <^>! - AltGr, example <^>!s stans for AltGr+s
 

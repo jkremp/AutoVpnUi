@@ -16,23 +16,39 @@ Once AutoVpnUi is started it is waiting for shortcut pressed. This shortcut will
 
 # How does it work?
 
-AutoVpnUi is triggered by a shortcut. Once pressed the AutoHotKey based routine in the script is triggered. This routine starts Cisco's VpnUi.exe which has to be installed. When the first dialogue opens it automatically initiates the connection procedure. In order this works as expected, the wanted VPN end point should have been selected in a manual connection process first.
-Once the connection is established the password dialogue pops up. The script will automatically enter the VPN password and confirm it. The authentication process starts. If the password was correct, the script will close the final information dialogue about the established connection and the routine is finished. The AutoVpnUi script keeps running in the background waiting to be triggered again by the shortcut.
+Once started AutoVpnUi runs in the background waiting to be triggered by shortcut. Once pressed the AutoHotKey based routine is executed. This routine starts Cisco's `VpnUi.exe` which has to be installed. When the first `VpnUi.exe`dialogue opens AutoVpnUi automatically initiates the VPN connection. 
 
-The first time the AutoVpnUi script wants to enter the VPN password a AutoVpnUi dialogue asks to type in the password. The given password will be encrypted and saved in an INI-configuration file next to the script. Each time the script is triggered by the shortcut it will look into the INI-file for the password, encrypts it and uses it for the automated login process. Now further interaction by the user is required after the shortcut had been pressed.
+*Remark*: The very first VPN connection must be initiated manually. `VpnUi.exe` remembers the last selected end point next time executed.
+
+Once the VPN connection is established the password dialogue pops up. AutoVpnUi will now automatically enter the VPN password and confirm it. The authentication process starts. If the password was correct, the script will close the final information dialogue about the established VPN connection. The routine is finished. AutoVpnUi script keeps running in the background waiting to be triggered again.
+
+The first time the AutoVpnUi is executed it asks to enter the VPN password. The given password will be encrypted and saved in an INI-configuration file next to AutoVpnUi executeable or script if run from source.
+
+Each time AutoVpnUi is triggered by the shortcut it will look into the INI-file for the password, decrypts it and uses it for the automated login process. No further interaction by the user is required after the shortcut had been pressed.
 
 # What happens with my VPN password?
 
-The user's VPN password is needed in order to provide a fully automated login process. 
+The user's VPN password is needed in order to provide a fully automated VPN login process. 
 
-The scrip asks for the password only the first time or until provided. The VPN password then encrypted and saved in an INI-file. The encryption uses an open source algorithm available in the AutoVpnUi's repository.
+It is the free choice of the user of AutoVpnUi to provide the VPN password.
 
-Please note, without saving the VPN password, this entire automation makes no sense. AutoVpnUi does some steps to protect the given password:
-* It will encrypt the password and saves it in an INI-file; the clear password is saved in a local variable of the program; preventing in-memory attacks, AutoVpnUi should be restarted after the password had been provided the first time.
-* When needed the password is read from the INI-file and decrypted. The decrypted password is not saved in a local variable and should be in program's memory for a "short" time
-* The encrption uses the Uuid of the machine where the encrpytion was executed. I.e. the password can only be encrypted on the same machine or by the knowledge of the Uuid.
+AutoVpnUi itself will only use the password to provide it to Cisco's VPN client when needed. 
 
-In the end it is up to the user of AutoVpnUi to provide the VPN password. AutoVpnUi itself will only the password to provide it automatically to Cisco's VPN client when needed. The password or any other VPN connected related information used or sent somewhere else.
+AutoVpnUi will never send any VPN connection related information like the password somewhere else.
+
+AutoVpnUi asks for the password only when triggered by the shortcut until the password is provided. The VPN password is encrypted and saved in an INI-file. The encryption uses an open source algorithm which is available in the AutoVpnUi's repository.
+
+**_Remark_**: AutoVpnUi never guarantees full protection for the provided VPN password. It is the users free choice to provide it. It is also the users responsibility keeping the INI-file with the encrypted stored password, safe.
+
+However, following precautions are taken by AutoVpnUi:
+* The provided VPN password is encrypted and saved in an INI-file
+* During the process of providing, encryption and saving the password, the clear password is saved in a local variable
+  * Preventing in-memory attacks, AutoVpnUi should be restarted after the password had been provided the first time
+* Each time AutoVpnUi needs the password it is read from the INI-file and decrypted
+  * The decrypted password is not saved in a local variable and should be in program's memory only for a "short" time - if even
+* AutoVpnUi uses the Uuid of the machine encrpyting the password
+  * The password can only be decrypted on the same machine or by the knowledge of the machine's Uuid
+
 
 # Configuration
 

@@ -10,7 +10,7 @@ Once AutoVpnUi is started it is waiting for a shortcut pressed. This shortcut wi
 * Download latest zip archive from repository
 * Unpack 
 * Start executable
-* Use preconfigured shortcut <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd>
+* Use preconfigured shortcut <kbd>CTRL</kbd>+<kbd>PrintScreen</kbd> to start login routine
 * Optional: install shortcut in autostart either manually or using provided PowerShell script
 
 

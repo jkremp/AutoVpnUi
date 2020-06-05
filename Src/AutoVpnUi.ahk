@@ -118,7 +118,7 @@ VpnUiAutomatePassword:
     Run, C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnui.exe
     
     SetTitleMatchMode, 3
-    WinWaitActive, %DlgTitleVpnUiMain%, ,5.0
+    WinWaitActive, %DlgTitleVpnUiMain%, ,15.0
     if WinActive(DlgTitleVpnUiMain)
     {
         ; Set keyboard focus to the control whose variable or text is "Connect".
@@ -126,30 +126,30 @@ VpnUiAutomatePassword:
         
         ; If VPN client ui is open (found by exact match of given window title), hit <Enter> to open password dialogue
         SendInput, {Enter}
-    }
-    
-    SetTitleMatchMode, 1
-    WinWaitActive, %DlgTitleVpnUiConnect%, ,5.0
-    if WinActive(DlgTitleVpnUiConnect)
-    {
-        ; If VPN client password dialogue is open (found by window's title must start with given string)
-        ; Check if a password has already been saved; if not ask and save it
-        ValueFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword) 
-        if (ErrorLevel)
-        {
-            SaveEncyrptedPasswordToIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
-        }
         
-        if (ErrorLevel = 0)
+        ; If VPN client password dialogue is open (found by window's title must start with given string)
+        SetTitleMatchMode, 1
+        WinWaitActive, %DlgTitleVpnUiConnect%, ,5.0
+        if WinActive(DlgTitleVpnUiConnect)
         {
-            SendInput, % DecryptPasswordFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
-            SendInput, {Enter}
+            ; Check if a password has already been saved; if not ask and save it
+            ValueFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword) 
+            if (ErrorLevel)
+            {
+                SaveEncyrptedPasswordToIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
+            }
             
-            SetTitleMatchMode, 3
-            WinWaitActive, Cisco AnyConnect, ,1.0
-            if ErrorLevel = 0
-            {		
+            if (ErrorLevel = 0)
+            {
+                SendInput, % DecryptPasswordFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
                 SendInput, {Enter}
+                
+                SetTitleMatchMode, 3
+                WinWaitActive, Cisco AnyConnect, ,1.0
+                if ErrorLevel = 0
+                {		
+                    SendInput, {Enter}
+                }
             }
         }
     }

@@ -38,7 +38,7 @@ AutoVpnUi will never send any VPN connection related information like the passwo
 
 AutoVpnUi asks for the password only when triggered by the shortcut until the password is provided. The VPN password is encrypted and saved in an INI-file. The encryption uses an open source algorithm which is available in the AutoVpnUi's repository.
 
-**_Remark_**: AutoVpnUi never guarantees full protection for the provided VPN password. It is the users free choice to provide it. It is also the users responsibility keeping the INI-file with the encrypted stored password, safe.
+**_Remark_**: AutoVpnUi never guarantees full protection for the provided VPN password. It is the users free choice to provide the VPN password. It is also the users responsibility keeping the INI-file with the encrypted password, safe.
 
 However, following precautions are taken by AutoVpnUi:
 * The provided VPN password is encrypted and saved in an INI-file

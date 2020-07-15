@@ -19,6 +19,11 @@ try {
     IniFileSectionShortcut = Shortcut
     IniFileKeyShortcut = Shortcut
     IniFileValueShortcut = ^PrintScreen
+    IniFileKeyShortcutRestartOnConnectionApplications = ShortcutRestartOnConnectionApplications
+    IniFileValueShortcutRestartOnConnectApplications = +PrintScreen
+    IniFileSectionOnVpnConnect = OnVpnConnect
+    IniFileKeyOnConnectStartApplications = OnConnectStartApplications
+    IniFileKeyOnConnectStopApplications = OnConnectStopApplications
     ; Encryption key encrypting given password using computer's UUID
     Key := % Uuid()
     ; VPN Client information
@@ -27,19 +32,16 @@ try {
     DlgTitleVpnUiConnectionSuspended = Cisco AnyConnect
     
     ; Get shortcut from ini-file - if not available save default shortcut
-    Shortcut := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcut) 
-    if (ErrorLevel)
-    {
-        SaveShortcutToIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcut, IniFileValueShortcut)
-        Shortcut := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcut) 
-    }
+    ShortcutVpn := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcut, IniFileValueShortcut) 
+    ShortcutRestartOnConnectionApplications := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutRestartOnConnectionApplications, IniFileValueShortcutRestartOnConnectApplications) 
     
     ; Bind the configured shortcut to the routine setting VPN password automatically
-    Hotkey, %Shortcut%, VpnUiAutomatePassword
+    Hotkey, %ShortcutVpn%, VpnUiAutomatePassword
+    Hotkey, %ShortcutRestartOnConnectionApplications%, RestartApplications
     
     return
 } catch e {
-    MsgBox, 16,, % "Error: " e.Message "at" e.Line
+    MsgBox, 16,, % "Error: " e.Message " At line: " e.Line
     exit 
 }
 
@@ -61,7 +63,7 @@ SaveEncyrptedPasswordToIniFile(IniFilename, IniFileSection, IniFileKeyVpnPasswor
 DecryptPasswordFromIniFile(IniFilename, IniFileSection, IniFileKeyVpnPassword, Key)
 {
     EncryptedPassword := % ValueFromIniFile(IniFilename, IniFileSection, IniFileKeyVpnPassword)
-    if ErrorLevel
+    if ErrorLevel or EncryptedPassword = ""
     {
         ErrorLevel = 1
     }
@@ -71,23 +73,116 @@ DecryptPasswordFromIniFile(IniFilename, IniFileSection, IniFileKeyVpnPassword, K
     }
 }
 
-ValueFromIniFile(IniFilename, IniFileSection, IniFileKey)
+ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, IniFileDefaultValue := "")
 {
-    if FileExist(IniFilename)
+    IniRead Value, %IniFilename%, %IniFileSection%, %IniFileKey%
+    ; If something went wrong 'ERROR' will be returned or key is not given yet
+    if (Value = "ERROR" or Value = "")
     {
+        IniWrite %IniFileDefaultValue%, %IniFilename%, %IniFileSection%, %IniFileKey%
         IniRead Value, %IniFilename%, %IniFileSection%, %IniFileKey%
-        ; If something went wrong 'ERROR' will be returned
-        if (Value != "ERROR" and Value != "")
-        {
-            return Value
-        }
+    }
+    if Value != "ERROR"
+    {
+        return Value
     }
     ErrorLevel = 1
 }
 
-SaveShortcutToIniFile(IniFilename, IniFileSection, IniFileKey, IniFileKeyValue)
+StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
 {
-    IniWrite %IniFileKeyValue%, %IniFilename%, %IniFileSection%, %IniFileKey%
+    AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
+    Apps := StrSplit(AppsFromIniFile, [";"])
+    Loop % Apps.MaxIndex()
+    {
+        App := Apps[A_Index]
+        StopProcess(App)
+    }
+}
+
+StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
+{
+    AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
+    Apps := StrSplit(AppsFromIniFile, [";"])
+    Loop % Apps.MaxIndex()
+    {
+        App := Apps[A_Index]
+        StartProcess(App)
+    }
+}
+
+RestartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
+{
+    StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications)
+    StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStartApplications)
+}
+
+StopProcess(NameOfProcess)
+{
+    try
+    {
+        Process, Exist, %NameOfProcess%
+        Pid := ErrorLevel
+        if ErrorLevel <> 0
+        {
+            WinShow, ahk_id %Pid%
+            WinWait, ahk_id %Pid%, , 1
+            WinWaitClose, ahk_id %Pid%, , 1
+            Process, Exist, %Pid%
+            if ErrorLevel
+            {
+                WinClose, ahk_id %Pid%
+                Process, Exist, %Pid%
+                if ErrorLevel
+                {
+                    MsgBox, 36,, Closing of %NameOfProcess% timed out! Force close?`nCaution, unsaved changes might be lost!
+                    IfMsgBox, Yes
+                    {
+                        Process, Close, %Pid%
+                    }
+                }
+            }
+        } 
+    }
+    catch e
+    {
+        MsgBox, 16,, % "Could not stop application: " NameOfProcess 
+        . "`n`nMessage: " e.message 
+        . "`n`nExtra: " e.extra 
+    }
+}
+
+StartProcess(NameOfProcess)
+{
+    try
+    {
+        Process, Exist, %NameOfProcess%
+        if ErrorLevel = 0
+        {
+            Run, %NameOfProcess%
+        }
+    }
+    catch e
+    {
+        MsgBox, 16,, % "Could not start application: " NameOfProcess 
+        . "`n`nMessage: " e.message 
+        . "`n`nExtra: " e.extra 
+    }
+}
+
+RestartProcess(NameOfProcess)
+{
+    try
+    {
+        StopProcess(NameOfProcess)
+        StartProcess(NameOfProcess)
+    }
+    catch e
+    {
+        MsgBox, 16,, % "Could not restart application: " NameOfProcess 
+        . "`n`nMessage: " e.message 
+        . "`n`nExtra: " e.extra 
+    }
 }
 
 VpnUiAutomatePassword:
@@ -118,7 +213,7 @@ VpnUiAutomatePassword:
     Run, C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnui.exe
     
     SetTitleMatchMode, 3
-    WinWaitActive, %DlgTitleVpnUiMain%, ,15.0
+    WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
     if WinActive(DlgTitleVpnUiMain)
     {
         ; Set keyboard focus to the control whose variable or text is "Connect".
@@ -129,12 +224,12 @@ VpnUiAutomatePassword:
         
         ; If VPN client password dialogue is open (found by window's title must start with given string)
         SetTitleMatchMode, 1
-        WinWaitActive, %DlgTitleVpnUiConnect%, ,5.0
+        WinWaitActive, %DlgTitleVpnUiConnect%, ,25.0
         if WinActive(DlgTitleVpnUiConnect)
         {
             ; Check if a password has already been saved; if not ask and save it
-            ValueFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword) 
-            if (ErrorLevel)
+            Value := % ValueFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword) 
+            if (ErrorLevel or Value = "")
             {
                 SaveEncyrptedPasswordToIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
             }
@@ -149,8 +244,19 @@ VpnUiAutomatePassword:
                 if ErrorLevel = 0
                 {		
                     SendInput, {Enter}
+                    
+                    ; Wait until VPN connection has been established fully
+                    WinActivate, %DlgTitleVpnUiMain%
+                    WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
+                    WinWaitNotActive, %DlgTitleVpnUiMain%, ,25.0
+                    ; Restart given application after VPN connection had been established
+                    RestartApplicationsFromIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
                 }
             }
         }
     }
+return
+
+RestartApplications:
+    RestartApplicationsFromIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
 return

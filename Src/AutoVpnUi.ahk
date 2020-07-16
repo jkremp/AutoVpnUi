@@ -17,10 +17,10 @@ try {
     IniFileSectionPassword = Password
     IniFileKeyVpnPassword = VpnPassword
     IniFileSectionShortcut = Shortcut
-    IniFileKeyShortcut = Shortcut
-    IniFileValueShortcut = ^PrintScreen
-    IniFileKeyShortcutRestartOnConnectionApplications = ShortcutRestartOnConnectionApplications
-    IniFileValueShortcutRestartOnConnectApplications = +PrintScreen
+    IniFileKeyShortcutVpnConnect = VpnConnect
+    IniFileValueShortcutVpnConnect = ^PrintScreen
+    IniFileKeyShortcutStartStopApplicationsOnVpnConnect = StartStopApplicationsOnVpnConnect
+    IniFileValueShortcutStartStopApplicationsOnVpnConnect = +PrintScreen
     IniFileSectionOnVpnConnect = OnVpnConnect
     IniFileKeyOnConnectStartApplications = OnConnectStartApplications
     IniFileKeyOnConnectStopApplications = OnConnectStopApplications
@@ -32,12 +32,12 @@ try {
     DlgTitleVpnUiConnectionSuspended = Cisco AnyConnect
     
     ; Get shortcut from ini-file - if not available save default shortcut
-    ShortcutVpn := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcut, IniFileValueShortcut) 
-    ShortcutRestartOnConnectionApplications := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutRestartOnConnectionApplications, IniFileValueShortcutRestartOnConnectApplications) 
+    ShortcutVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnConnect, IniFileValueShortcutVpnConnect) 
+    ShortcutStartStopApplicationsOnVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnConnect, IniFileValueShortcutStartStopApplicationsOnVpnConnect) 
     
     ; Bind the configured shortcut to the routine setting VPN password automatically
-    Hotkey, %ShortcutVpn%, VpnUiAutomatePassword
-    Hotkey, %ShortcutRestartOnConnectionApplications%, RestartApplications
+    Hotkey, %ShortcutVpnConnect%, VpnUiAutomatePassword
+    Hotkey, %ShortcutStartStopApplicationsOnVpnConnect%, RestartApplications
     
     return
 } catch e {
@@ -89,7 +89,7 @@ ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, IniFileDefaultValue :=
     ErrorLevel = 1
 }
 
-StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
+StopApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKey)
 {
     AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
     Apps := StrSplit(AppsFromIniFile, [";"])
@@ -100,7 +100,7 @@ StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
     }
 }
 
-StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
+StartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKey)
 {
     AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
     Apps := StrSplit(AppsFromIniFile, [";"])
@@ -111,10 +111,10 @@ StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
     }
 }
 
-RestartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
+StopStartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
 {
-    StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications)
-    StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStartApplications)
+    StopApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications)
+    StartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStartApplications)
 }
 
 StopProcess(NameOfProcess)
@@ -250,7 +250,7 @@ VpnUiAutomatePassword:
                     WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
                     WinWaitNotActive, %DlgTitleVpnUiMain%, ,25.0
                     ; Restart given application after VPN connection had been established
-                    RestartApplicationsFromIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+                    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
                 }
             }
         }
@@ -258,5 +258,5 @@ VpnUiAutomatePassword:
 return
 
 RestartApplications:
-    RestartApplicationsFromIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
 return

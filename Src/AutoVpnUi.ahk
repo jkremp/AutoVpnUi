@@ -14,16 +14,27 @@ try {
     SplitPath, A_ScriptName,,,, ScriptName
     ; INI file configurations
     IniFilename = %ScriptName%.ini
+    ; INI file configurations - section Password
     IniFileSectionPassword = Password
     IniFileKeyVpnPassword = VpnPassword
-    IniFileSectionShortcut = Shortcut
-    IniFileKeyShortcut = Shortcut
-    IniFileValueShortcut = ^PrintScreen
-    IniFileKeyShortcutRestartOnConnectionApplications = ShortcutRestartOnConnectionApplications
-    IniFileValueShortcutRestartOnConnectApplications = +PrintScreen
+    ; INI file configurations - section Shortcuts
+    IniFileSectionShortcut = Shortcuts
+    IniFileKeyShortcutVpnConnect = VpnConnect
+    IniFileValueShortcutVpnConnect = ^PrintScreen
+    IniFileKeyShortcutVpnDisconnect = VpnDisconnect
+    IniFileValueShortcutVpnDisconnect = ^+PrintScreen
+    IniFileKeyShortcutStartStopApplicationsOnVpnConnect = StartStopApplicationsOnVpnConnect
+    IniFileValueShortcutStartStopApplicationsOnVpnConnect = <^>!PrintScreen
+    IniFileKeyShortcutStartStopApplicationsOnVpnDisconnect = StartStopApplicationsOnVpnDisconnect
+    IniFileValueShortcutStartStopApplicationsOnVpnDisconnect = <^>!+PrintScreen
+    ; INI file configurations - section OnVpnConnect
     IniFileSectionOnVpnConnect = OnVpnConnect
     IniFileKeyOnConnectStartApplications = OnConnectStartApplications
     IniFileKeyOnConnectStopApplications = OnConnectStopApplications
+    ; INI file configurations - section OnVpnDisconnect
+    IniFileSectionOnVpnDisconnect = OnVpnDisconnect
+    IniFileKeyOnDisconnectStartApplications = OnDisconnectStartApplications
+    IniFileKeyOnDisconnectStopApplications = OnDisconnectStopApplications
     ; Encryption key encrypting given password using computer's UUID
     Key := % Uuid()
     ; VPN Client information
@@ -32,12 +43,16 @@ try {
     DlgTitleVpnUiConnectionSuspended = Cisco AnyConnect
     
     ; Get shortcut from ini-file - if not available save default shortcut
-    ShortcutVpn := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcut, IniFileValueShortcut) 
-    ShortcutRestartOnConnectionApplications := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutRestartOnConnectionApplications, IniFileValueShortcutRestartOnConnectApplications) 
+    ShortcutVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnConnect, IniFileValueShortcutVpnConnect) 
+    ShortcutVpnDisconnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnDisconnect, IniFileValueShortcutVpnDisconnect) 
+    ShortcutStartStopApplicationsOnVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnConnect, IniFileValueShortcutStartStopApplicationsOnVpnConnect) 
+    ShortcutStartStopApplicationsOnVpnDisconnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnDisconnect, IniFileValueShortcutStartStopApplicationsOnVpnDisconnect) 
     
-    ; Bind the configured shortcut to the routine setting VPN password automatically
-    Hotkey, %ShortcutVpn%, VpnUiAutomatePassword
-    Hotkey, %ShortcutRestartOnConnectionApplications%, RestartApplications
+    ; Bind the configured shortcut to the correspondent routines
+    Hotkey, %ShortcutVpnConnect%, AutomateVpnConnect
+    Hotkey, %ShortcutVpnDisconnect%, AutomateVpnDisconnect
+    Hotkey, %ShortcutStartStopApplicationsOnVpnConnect%, RestartVpnConnectApplications
+    Hotkey, %ShortcutStartStopApplicationsOnVpnDisconnect%, RestartVpnDisconnectApplications
     
     return
 } catch e {
@@ -89,7 +104,7 @@ ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, IniFileDefaultValue :=
     ErrorLevel = 1
 }
 
-StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
+StopApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKey)
 {
     AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
     Apps := StrSplit(AppsFromIniFile, [";"])
@@ -100,7 +115,7 @@ StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
     }
 }
 
-StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
+StartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKey)
 {
     AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
     Apps := StrSplit(AppsFromIniFile, [";"])
@@ -111,10 +126,10 @@ StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKey)
     }
 }
 
-RestartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
+StopStartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
 {
-    StopApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications)
-    StartApplicationsFromIniFile(IniFilename, IniFileSection, IniFileKeyStartApplications)
+    StopApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications)
+    StartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStartApplications)
 }
 
 StopProcess(NameOfProcess)
@@ -185,7 +200,24 @@ RestartProcess(NameOfProcess)
     }
 }
 
-VpnUiAutomatePassword:
+ButtonWaitEnabled(WinTitle, Control, Timeout)
+{
+    StartTime := A_TickCount
+    Loop, {
+        ControlGet, OutputVar, Enabled, , %Control%, %WinTitle%
+        if (OutputVar = 1) {
+            enabled := true
+            break
+        }
+        else if (A_TickCount - StartTime > (Timeout*1000)) {
+            enabled := false ;timeout
+            break
+        }
+    }
+    return enabled
+}
+
+AutomateVpnConnect:
     ; Check and close if information dialogue connection suspended is open
     SetTitleMatchMode, 3
     if WinExist(DlgTitleVpnUiConnectionSuspended)
@@ -218,45 +250,76 @@ VpnUiAutomatePassword:
     {
         ; Set keyboard focus to the control whose variable or text is "Connect".
         ControlFocus, Connect, %DlgTitleVpnUiMain%
-        
-        ; If VPN client ui is open (found by exact match of given window title), hit <Enter> to open password dialogue
-        SendInput, {Enter}
-        
-        ; If VPN client password dialogue is open (found by window's title must start with given string)
-        SetTitleMatchMode, 1
-        WinWaitActive, %DlgTitleVpnUiConnect%, ,25.0
-        if WinActive(DlgTitleVpnUiConnect)
+        if !ErrorLevel
         {
-            ; Check if a password has already been saved; if not ask and save it
-            Value := % ValueFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword) 
-            if (ErrorLevel or Value = "")
-            {
-                SaveEncyrptedPasswordToIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
-            }
+            ; If VPN client ui is open (found by exact match of given window title), hit <Enter> to open password dialogue
+            SendInput, {Enter}
             
-            if (ErrorLevel = 0)
+            ; If VPN client password dialogue is open (found by window's title must start with given string)
+            SetTitleMatchMode, 1
+            WinWaitActive, %DlgTitleVpnUiConnect%, ,25.0
+            if WinActive(DlgTitleVpnUiConnect)
             {
-                SendInput, % DecryptPasswordFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
-                SendInput, {Enter}
+                ; Check if a password has already been saved; if not ask and save it
+                Value := % ValueFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword) 
+                if (ErrorLevel or Value = "")
+                {
+                    SaveEncyrptedPasswordToIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
+                }
                 
-                SetTitleMatchMode, 3
-                WinWaitActive, Cisco AnyConnect, ,1.0
-                if ErrorLevel = 0
-                {		
+                if (ErrorLevel = 0)
+                {
+                    SendInput, % DecryptPasswordFromIniFile(IniFilename, IniFileSectionPassword, IniFileKeyVpnPassword, Key)
                     SendInput, {Enter}
                     
-                    ; Wait until VPN connection has been established fully
-                    WinActivate, %DlgTitleVpnUiMain%
-                    WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
-                    WinWaitNotActive, %DlgTitleVpnUiMain%, ,25.0
-                    ; Restart given application after VPN connection had been established
-                    RestartApplicationsFromIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+                    SetTitleMatchMode, 3
+                    WinWaitActive, Cisco AnyConnect, ,1.0
+                    if ErrorLevel = 0
+                    {		
+                        SendInput, {Enter}
+                        
+                        ; Wait until VPN connection has been established fully
+                        WinActivate, %DlgTitleVpnUiMain%
+                        WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
+                        WinWaitNotActive, %DlgTitleVpnUiMain%, ,25.0
+                        ; Restart given application after VPN connection had been established
+                        StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+                    }
                 }
             }
         }
     }
 return
 
-RestartApplications:
-    RestartApplicationsFromIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+AutomateVpnDisconnect:
+    ; Start VPN client, if active it will become formost window
+    Run, C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnui.exe
+    SetTitleMatchMode, 3
+    WinWaitActive, %DlgTitleVpnUiMain%, , 2
+    
+    ; Get focused element and check if it the 'Disconnect' button
+    ControlGetFocus, CtrlFocused, %DlgTitleVpnUiMain%
+    if !ErrorLevel
+    {
+        ControlGetText, CtrlText, %CtrlFocused%, %DlgTitleVpnUiMain%
+        ; Disconnect VPN connection if 'Disconnect' button is shown and has focus
+        if CtrlText = Disconnect
+        {
+            SendInput, {Enter}
+        }
+        ; Wait until keyboard focus is on control whose text is "Connect" -> VPN is disconnected
+        if ButtonWaitEnabled(DlgTitleVpnUiMain, Connect, 25)
+        {
+            ; Restart given application after VPN had been disconnected
+            StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
+        }
+    }
+return
+
+RestartVpnConnectApplications:
+    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+return
+
+RestartVpnDisconnectApplications:
+    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
 return

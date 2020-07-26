@@ -14,18 +14,24 @@ try {
     SplitPath, A_ScriptName,,,, ScriptName
     ; INI file configurations
     IniFilename = %ScriptName%.ini
+    ; INI file configurations - section Password
     IniFileSectionPassword = Password
     IniFileKeyVpnPassword = VpnPassword
-    IniFileSectionShortcut = Shortcut
+    ; INI file configurations - section Shortcuts
+    IniFileSectionShortcut = Shortcuts
     IniFileKeyShortcutVpnConnect = VpnConnect
     IniFileValueShortcutVpnConnect = ^PrintScreen
     IniFileKeyShortcutVpnDisconnect = VpnDisconnect
     IniFileValueShortcutVpnDisconnect = ^+PrintScreen
     IniFileKeyShortcutStartStopApplicationsOnVpnConnect = StartStopApplicationsOnVpnConnect
-    IniFileValueShortcutStartStopApplicationsOnVpnConnect = +PrintScreen
+    IniFileValueShortcutStartStopApplicationsOnVpnConnect = <^>!PrintScreen
+    IniFileKeyShortcutStartStopApplicationsOnVpnDisconnect = StartStopApplicationsOnVpnDisconnect
+    IniFileValueShortcutStartStopApplicationsOnVpnDisconnect = <^>!+PrintScreen
+    ; INI file configurations - section OnVpnConnect
     IniFileSectionOnVpnConnect = OnVpnConnect
     IniFileKeyOnConnectStartApplications = OnConnectStartApplications
     IniFileKeyOnConnectStopApplications = OnConnectStopApplications
+    ; INI file configurations - section OnVpnDisconnect
     IniFileSectionOnVpnDisconnect = OnVpnDisconnect
     IniFileKeyOnDisconnectStartApplications = OnDisconnectStartApplications
     IniFileKeyOnDisconnectStopApplications = OnDisconnectStopApplications
@@ -38,13 +44,15 @@ try {
     
     ; Get shortcut from ini-file - if not available save default shortcut
     ShortcutVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnConnect, IniFileValueShortcutVpnConnect) 
-    ShortcutStartStopApplicationsOnVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnConnect, IniFileValueShortcutStartStopApplicationsOnVpnConnect) 
     ShortcutVpnDisconnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnDisconnect, IniFileValueShortcutVpnDisconnect) 
+    ShortcutStartStopApplicationsOnVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnConnect, IniFileValueShortcutStartStopApplicationsOnVpnConnect) 
+    ShortcutStartStopApplicationsOnVpnDisconnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnDisconnect, IniFileValueShortcutStartStopApplicationsOnVpnDisconnect) 
     
     ; Bind the configured shortcut to the correspondent routines
     Hotkey, %ShortcutVpnConnect%, AutomateVpnConnect
     Hotkey, %ShortcutVpnDisconnect%, AutomateVpnDisconnect
-    Hotkey, %ShortcutStartStopApplicationsOnVpnConnect%, RestartApplications
+    Hotkey, %ShortcutStartStopApplicationsOnVpnConnect%, RestartVpnConnectApplications
+    Hotkey, %ShortcutStartStopApplicationsOnVpnDisconnect%, RestartVpnDisconnectApplications
     
     return
 } catch e {
@@ -308,6 +316,10 @@ AutomateVpnDisconnect:
     }
 return
 
-RestartApplications:
+RestartVpnConnectApplications:
     StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+return
+
+RestartVpnDisconnectApplications:
+    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
 return

@@ -26,6 +26,9 @@ try {
     IniFileSectionOnVpnConnect = OnVpnConnect
     IniFileKeyOnConnectStartApplications = OnConnectStartApplications
     IniFileKeyOnConnectStopApplications = OnConnectStopApplications
+    IniFileSectionOnVpnDisconnect = OnVpnDisconnect
+    IniFileKeyOnDisconnectStartApplications = OnDisconnectStartApplications
+    IniFileKeyOnDisconnectStopApplications = OnDisconnectStopApplications
     ; Encryption key encrypting given password using computer's UUID
     Key := % Uuid()
     ; VPN Client information
@@ -189,6 +192,23 @@ RestartProcess(NameOfProcess)
     }
 }
 
+ButtonWaitEnabled(WinTitle, Control, Timeout)
+{
+    StartTime := A_TickCount
+    Loop, {
+        ControlGet, OutputVar, Enabled, , %Control%, %WinTitle%
+        if (OutputVar = 1) {
+            enabled := true
+            break
+        }
+        else if (A_TickCount - StartTime > (Timeout*1000)) {
+            enabled := false ;timeout
+            break
+        }
+    }
+    return enabled
+}
+
 AutomateVpnConnect:
     ; Check and close if information dialogue connection suspended is open
     SetTitleMatchMode, 3
@@ -274,9 +294,16 @@ AutomateVpnDisconnect:
     if !ErrorLevel
     {
         ControlGetText, CtrlText, %CtrlFocused%, %DlgTitleVpnUiMain%
+        ; Disconnect VPN connection if 'Disconnect' button is shown and has focus
         if CtrlText = Disconnect
         {
             SendInput, {Enter}
+        }
+        ; Wait until keyboard focus is on control whose text is "Connect" -> VPN is disconnected
+        if ButtonWaitEnabled(DlgTitleVpnUiMain, Connect, 25)
+        {
+            ; Restart given application after VPN had been disconnected
+            StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
         }
     }
 return

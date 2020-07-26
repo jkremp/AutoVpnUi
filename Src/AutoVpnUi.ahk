@@ -19,6 +19,8 @@ try {
     IniFileSectionShortcut = Shortcut
     IniFileKeyShortcutVpnConnect = VpnConnect
     IniFileValueShortcutVpnConnect = ^PrintScreen
+    IniFileKeyShortcutVpnDisconnect = VpnDisconnect
+    IniFileValueShortcutVpnDisconnect = ^+PrintScreen
     IniFileKeyShortcutStartStopApplicationsOnVpnConnect = StartStopApplicationsOnVpnConnect
     IniFileValueShortcutStartStopApplicationsOnVpnConnect = +PrintScreen
     IniFileSectionOnVpnConnect = OnVpnConnect
@@ -34,9 +36,11 @@ try {
     ; Get shortcut from ini-file - if not available save default shortcut
     ShortcutVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnConnect, IniFileValueShortcutVpnConnect) 
     ShortcutStartStopApplicationsOnVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnConnect, IniFileValueShortcutStartStopApplicationsOnVpnConnect) 
+    ShortcutVpnDisconnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnDisconnect, IniFileValueShortcutVpnDisconnect) 
     
     ; Bind the configured shortcut to the routine setting VPN password automatically
     Hotkey, %ShortcutVpnConnect%, VpnUiAutomatePassword
+    Hotkey, %ShortcutVpnDisconnect%, AutomateVpnDisconnect
     Hotkey, %ShortcutStartStopApplicationsOnVpnConnect%, RestartApplications
     
     return
@@ -253,6 +257,24 @@ VpnUiAutomatePassword:
                     StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
                 }
             }
+        }
+    }
+return
+
+AutomateVpnDisconnect:
+    ; Start VPN client, if active it will become formost window
+    Run, C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnui.exe
+    SetTitleMatchMode, 3
+    WinWaitActive, %DlgTitleVpnUiMain%, , 2
+    
+    ; Get focused element and check if it the 'Disconnect' button
+    ControlGetFocus, CtrlFocused, %DlgTitleVpnUiMain%
+    if !ErrorLevel
+    {
+        ControlGetText, CtrlText, %CtrlFocused%, %DlgTitleVpnUiMain%
+        if CtrlText = Disconnect
+        {
+            SendInput, {Enter}
         }
     }
 return

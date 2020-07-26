@@ -38,8 +38,8 @@ try {
     ShortcutStartStopApplicationsOnVpnConnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutStartStopApplicationsOnVpnConnect, IniFileValueShortcutStartStopApplicationsOnVpnConnect) 
     ShortcutVpnDisconnect := % ValueFromIniFile(IniFilename, IniFileSectionShortcut, IniFileKeyShortcutVpnDisconnect, IniFileValueShortcutVpnDisconnect) 
     
-    ; Bind the configured shortcut to the routine setting VPN password automatically
-    Hotkey, %ShortcutVpnConnect%, VpnUiAutomatePassword
+    ; Bind the configured shortcut to the correspondent routines
+    Hotkey, %ShortcutVpnConnect%, AutomateVpnConnect
     Hotkey, %ShortcutVpnDisconnect%, AutomateVpnDisconnect
     Hotkey, %ShortcutStartStopApplicationsOnVpnConnect%, RestartApplications
     
@@ -189,7 +189,7 @@ RestartProcess(NameOfProcess)
     }
 }
 
-VpnUiAutomatePassword:
+AutomateVpnConnect:
     ; Check and close if information dialogue connection suspended is open
     SetTitleMatchMode, 3
     if WinExist(DlgTitleVpnUiConnectionSuspended)

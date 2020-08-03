@@ -1,5 +1,5 @@
 # AutoVpnUi
-When triggered, AutoVpnUi automates the complete VPN connection process including entering the password. AutoVpnUi is a [AutoHotKey](https://www.autohotkey.com) script wrapping Cisco's VPN client `VpnUi.exe`.
+When triggered, AutoVpnUi automates the complete VPN connection process including entering the password. AutoVpnUi is a [AutoHotKey](https://www.autohotkey.com) script wrapping Cisco's AnyConnect VPN client `VpnUi.exe`.
 
 AutoVpnUi runs in the background and is either started as a script, which requires a AutoHotKey installation, or as a compiled executeable.
 
@@ -16,7 +16,7 @@ Once AutoVpnUi is started it is waiting for a shortcut pressed. This shortcut wi
 
 # How does it work?
 
-Once started AutoVpnUi runs in the background waiting to be triggered by shortcut. Once pressed the AutoHotKey based routine is executed. This routine starts Cisco's `VpnUi.exe` which has to be installed. When the first `VpnUi.exe`dialogue opens AutoVpnUi automatically initiates the VPN connection. 
+Once started AutoVpnUi runs in the background waiting to be triggered by shortcut. Once pressed the AutoHotKey based routine is executed. This routine starts Cisco's AnyConnect `VpnUi.exe` which has to be installed. When the first `VpnUi.exe`dialogue opens AutoVpnUi automatically initiates the VPN connection. 
 
 *Remark*: The very first VPN connection must be initiated manually. `VpnUi.exe` remembers the last selected end point next time executed.
 
@@ -49,6 +49,14 @@ However, following precautions are taken by AutoVpnUi:
 * AutoVpnUi uses the Uuid of the machine encrpyting the password
   * The password can only be decrypted on the same machine or by the knowledge of the machine's Uuid
 
+# Additinal features
+
+Next to the automated setup of the VPN connection, AutoVpnUi supports some additional functions:
+
+* Stop and start given applications when VPN connection is setup
+* Stop and start given applications when VPN connection is closed
+* Stop and start given appilcations configured for a setup VPN connection by a shortcut
+* Stop and start given applications configured for a closed VPN connection by a shortcut
 
 # Configuration
 
@@ -58,9 +66,18 @@ All settings are saved in an INI-file next to the AutoVpnUi script respectively 
 
 The VPN password is encrypted and saved in the INI-file. If the password shall be reset the correspondent entry must be removed.
 
-## Shortcut
+## Shortcuts
 
-The shortcut initiating the actual behaviour of AutoVpnUi is saved in the INI-file. The default shortcut can be changed using following notations:
+Shortcuts or also named hotkeys are a combination of several keystrokes like <kbd>Ctrl</kbd>+<kbd>c</kbd>.
+
+AutoVpnUi supports following shortcuts:
+
+* Setup VPN connection: <kbd>Ctrl</kbd>+<kbd>PrintScreen</kbd>
+* Disconnect VPN connection: <kbd>Ctrl</kbd>+<kbd>SHIFT</kbd>+<kbd>PrintScreen</kbd>
+* Stop/start configured applications after VPN connection is setup: <kbd>AltGr</kbd>+<kbd>PrintScreen</kbd>
+* Stop/start configured applications after VPN connection is close: <kbd>AltGr</kbd>+<kbd>SHIFT</kbd>+<kbd>PrintScreen</kbd>
+
+The shortcuts initiating the behaviours of AutoVpnUi mentioned above are saved in the INI-file. The default values can be changed using following notations:
 
 Notation:
 * `^` - means <kbd>Ctrl</kbd> key, example: `^s` stands for <kbd>Ctrl</kbd>+<kbd>s</kbd>
@@ -69,6 +86,18 @@ Notation:
 * `#` - <kbd>Win</kbd> key, example: `#s` stands for <kbd>Win</kbd>+<kbd>s</kbd>
 * `<^>!` - <kbd>AltGr</kbd>, example `<^>!s` stans for <kbd>AltGr</kbd>+<kbd>s</kbd>
 * Many more can be found here: https://www.autohotkey.com/docs/Hotkeys.htm.
+
+## On VPN connection
+
+Configure a list (seperated by semi colon <kbd>;</kbd>) of names of applications which shall be stopped or started or both as soon as the VPN connection is setup.
+
+The name of the application can be just the like `Notepad.exe` if it is in the global path or by its complete path like `C:\Windows\Notepad.exe`. It is also possible to provide parameters which are passed to the applicatiion like `Notepad.exe MyDocument.txt`.
+
+## On VPN disconnection
+
+Configure a list (seperated by semi colon <kbd>;</kbd>) of names of applications which shall be stopped or started or both as soon as the VPN connection is closed.
+
+The name of the application can be just the like `Notepad.exe` if it is in the global path or by its complete path like `C:\Windows\Notepad.exe`. It is also possible to provide parameters which are passed to the applicatiion like `Notepad.exe MyDocument.txt`.
 
 # Run from source
 

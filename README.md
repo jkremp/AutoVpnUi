@@ -1,3 +1,7 @@
+```diff
+-> The ini-file of version 1.x is not compatible with version 2.x anymore. It is recommended to delete entire ini-file and use the one which is created by AutoVpnUi. However, if needed personal settings require a manual transfer from the old to the new ini-file. There is no automated migration procedure.
+```
+
 # AutoVpnUi
 When triggered, AutoVpnUi automates the complete VPN connection process including entering the password. AutoVpnUi is a [AutoHotKey](https://www.autohotkey.com) script wrapping Cisco's AnyConnect VPN client `VpnUi.exe`.
 

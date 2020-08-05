@@ -273,7 +273,7 @@ AutomateVpnConnect:
                     SendInput, {Enter}
                     
                     SetTitleMatchMode, 3
-                    WinWaitActive, Cisco AnyConnect, ,1.0
+                    WinWaitActive, Cisco AnyConnect, ,5.0
                     if ErrorLevel = 0
                     {		
                         SendInput, {Enter}

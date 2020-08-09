@@ -142,11 +142,11 @@ StopProcess(NameOfProcess)
         {
             WinShow, ahk_id %Pid%
             WinWait, ahk_id %Pid%, , 1
-            WinWaitClose, ahk_id %Pid%, , 1
+            WinWaitClose, ahk_id %Pid%, , 3
             Process, Exist, %Pid%
             if ErrorLevel
             {
-                WinClose, ahk_id %Pid%
+                WinWaitClose, ahk_id %Pid%, , 3
                 Process, Exist, %Pid%
                 if ErrorLevel
                 {
@@ -154,6 +154,7 @@ StopProcess(NameOfProcess)
                     IfMsgBox, Yes
                     {
                         Process, Close, %Pid%
+                        WinWaitClose, ahk_id %Pid%, , 3
                     }
                 }
             }

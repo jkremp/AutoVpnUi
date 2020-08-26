@@ -28,4 +28,4 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Build executeable from autohotkey script
-      run: .\Build.ps1
+      run: Ahk2Exe.exe /in .\Src\AutoVpnUi.ahk /icon .\Res\AutoVpnUi_48x48.ico /out .\AutoVpnUi.exe

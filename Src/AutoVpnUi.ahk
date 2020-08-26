@@ -104,14 +104,14 @@ ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, IniFileDefaultValue :=
     ErrorLevel = 1
 }
 
-StopApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKey)
+StopApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSection, IniFileKey)
 {
     AppsFromIniFile := ValueFromIniFile(IniFilename, IniFileSection, IniFileKey, "")
     Apps := StrSplit(AppsFromIniFile, [";"])
     Loop % Apps.MaxIndex()
     {
         App := Apps[A_Index]
-        StopProcess(App)
+        StopProcess(ScriptName, App)
     }
 }
 
@@ -126,13 +126,13 @@ StartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKey)
     }
 }
 
-StopStartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
+StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSection, IniFileKeyStopApplications, IniFileKeyStartApplications)
 {
-    StopApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStopApplications)
+    StopApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSection, IniFileKeyStopApplications)
     StartApplicationsGivenByIniFile(IniFilename, IniFileSection, IniFileKeyStartApplications)
 }
 
-StopProcess(NameOfProcess)
+StopProcess(ScriptName, NameOfProcess)
 {
     try
     {
@@ -141,21 +141,17 @@ StopProcess(NameOfProcess)
         if ErrorLevel <> 0
         {
             WinShow, ahk_id %Pid%
-            WinWait, ahk_id %Pid%, , 1
-            WinWaitClose, ahk_id %Pid%, , 3
+            WinWait, ahk_id %Pid%, , 3
+            WinClose, ahk_id %Pid%
+            WinWaitClose, ahk_id %Pid%, , 6
             Process, Exist, %Pid%
             if ErrorLevel
             {
-                WinWaitClose, ahk_id %Pid%, , 3
-                Process, Exist, %Pid%
-                if ErrorLevel
+                MsgBox, 36, %ScriptName% - Restart %NameOfProcess%, Timeout while closing %NameOfProcess%!`n`nForce close? Caution, unsaved changes might be lost!
+                IfMsgBox, Yes
                 {
-                    MsgBox, 36,, Closing of %NameOfProcess% timed out! Force close?`nCaution, unsaved changes might be lost!
-                    IfMsgBox, Yes
-                    {
-                        Process, Close, %Pid%
-                        WinWaitClose, ahk_id %Pid%, , 3
-                    }
+                    Process, Close, %Pid%
+                    WinWaitClose, ahk_id %Pid%, , 6
                 }
             }
         } 
@@ -181,21 +177,6 @@ StartProcess(NameOfProcess)
     catch e
     {
         MsgBox, 16,, % "Could not start application: " NameOfProcess 
-        . "`n`nMessage: " e.message 
-        . "`n`nExtra: " e.extra 
-    }
-}
-
-RestartProcess(NameOfProcess)
-{
-    try
-    {
-        StopProcess(NameOfProcess)
-        StartProcess(NameOfProcess)
-    }
-    catch e
-    {
-        MsgBox, 16,, % "Could not restart application: " NameOfProcess 
         . "`n`nMessage: " e.message 
         . "`n`nExtra: " e.extra 
     }
@@ -279,12 +260,12 @@ AutomateVpnConnect:
                     {		
                         SendInput, {Enter}
                         
-                        ; Wait until VPN connection has been established fully
+                        ; Wait until VPN connection has been fully established
                         WinActivate, %DlgTitleVpnUiMain%
                         WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
                         WinWaitNotActive, %DlgTitleVpnUiMain%, ,25.0
                         ; Restart given application after VPN connection had been established
-                        StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+                        StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
                     }
                 }
             }
@@ -312,15 +293,18 @@ AutomateVpnDisconnect:
         if ButtonWaitEnabled(DlgTitleVpnUiMain, Connect, 25)
         {
             ; Restart given application after VPN had been disconnected
-            StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
+            StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
         }
+        
     }
+    WinClose, %DlgTitleVpnUiMain%
+    WinWaitClose, , , 3
 return
 
 RestartVpnConnectApplications:
-    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
+    StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
 return
 
 RestartVpnDisconnectApplications:
-    StopStartApplicationsGivenByIniFile(IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
+    StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
 return

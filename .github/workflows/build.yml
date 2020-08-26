@@ -24,8 +24,6 @@ jobs:
 
     # Install autohotkey needed to compile AutoHotkey script to executeable
     - name: Install autohotkey by package manager chocolatey
-      run: choco install autohotkey
-
-    # Runs a single command using the runners shell
-    - name: Build executeable from autohotkey script
-      run: Ahk2Exe.exe /in .\Src\AutoVpnUi.ahk /icon .\Res\AutoVpnUi_48x48.ico /out .\AutoVpnUi.exe
+      run: |
+        choco install autohotkey
+        Ahk2Exe.exe /in .\Src\AutoVpnUi.ahk /icon .\Res\AutoVpnUi_48x48.ico /out .\AutoVpnUi.exe

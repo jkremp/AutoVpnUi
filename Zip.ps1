@@ -1,8 +1,9 @@
-$Version = '2.0.2'
+$Version = '2.0.3'
 $ApplicationName = 'AutoVpnUi'
 $Cwd = $MyInvocation.MyCommand.Path | Split-Path -Parent
-$SourcePath = $Cwd + '\Dist'
+$DistPath = $Cwd + '\Dist'
 $ResPath = $Cwd + '\Res'
+$BuildScript = $Cwd + '\Build.ps1'
 
-Copy-Item $ResPath\AddToAutostart.ps1 $SourcePath
-Compress-Archive -Path $SourcePath\* -DestinationPath .\$ApplicationName-$Version.zip -Force
+Invoke-Expression -Command $BuildScript
+Get-ChildItem -Path $ResPath\AddToAutostart.ps1, $DistPath\$ApplicationName.exe | Compress-Archive -DestinationPath .\$ApplicationName-$Version.zip -Force

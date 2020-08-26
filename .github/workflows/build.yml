@@ -26,5 +26,5 @@ jobs:
     - name: Install autohotkey by package manager chocolatey
       run: |
         choco install autohotkey
-        "C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe"
+        dir "C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe"
         Ahk2Exe.exe /in .\Src\AutoVpnUi.ahk /icon .\Res\AutoVpnUi_48x48.ico /out .\AutoVpnUi.exe

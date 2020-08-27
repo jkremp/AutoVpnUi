@@ -1,4 +1,4 @@
-$Version = '2.0.3'
+$Version = '2.0.4'
 $ApplicationName = 'AutoVpnUi'
 $Cwd = $MyInvocation.MyCommand.Path | Split-Path -Parent
 $DistPath = $Cwd + '\Dist'

@@ -24,4 +24,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build executeable from autohotkey script
-        run: & ${Env:ProgramFiles}\AutoHotkey\Compiler\Ahk2Exe.exe /in .\Src\AutoVpnUi.ahk /icon .\Res\AutoVpnUi_48x48.ico /out .\AutoVpnUi.exe
+        run: |
+          & ${Env:ProgramFiles}\AutoHotkey\Compiler\Ahk2Exe.exe /in .\Src\AutoVpnUi.ahk /icon .\Res\AutoVpnUi_48x48.ico /out .\AutoVpnUi.exe

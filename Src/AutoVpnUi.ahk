@@ -151,7 +151,11 @@ StopProcess(ScriptName, NameOfProcess)
                 IfMsgBox, Yes
                 {
                     Process, Close, %Pid%
-                    WinWaitClose, ahk_id %Pid%, , 6
+                    WinWaitClose, ahk_id %Pid%, , 9
+                    if ErrorLevel
+                    {
+                        MsgBox, Timeout: %NameOfProcess% could not be closed. Try manually.
+                    }
                 }
             }
         } 
@@ -263,7 +267,7 @@ AutomateVpnConnect:
                         ; Wait until VPN connection has been fully established
                         WinActivate, %DlgTitleVpnUiMain%
                         WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
-                        WinWaitNotActive, %DlgTitleVpnUiMain%, ,25.0
+                        WinWaitClose, %DlgTitleVpnUiMain%, ,25.0
                         ; Restart given application after VPN connection had been established
                         StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
                     }

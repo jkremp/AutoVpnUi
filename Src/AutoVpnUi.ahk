@@ -141,9 +141,9 @@ StopProcess(ScriptName, NameOfProcess)
         if ErrorLevel <> 0
         {
             WinShow, ahk_id %Pid%
-            WinWait, ahk_id %Pid%, , 3
+            WinWait, ahk_id %Pid%, , 3.0
             WinClose, ahk_id %Pid%
-            WinWaitClose, ahk_id %Pid%, , 6
+            WinWaitClose, ahk_id %Pid%, , 3.0
             Process, Exist, %Pid%
             if ErrorLevel
             {
@@ -151,7 +151,7 @@ StopProcess(ScriptName, NameOfProcess)
                 IfMsgBox, Yes
                 {
                     Process, Close, %Pid%
-                    WinWaitClose, ahk_id %Pid%, , 9
+                    WinWaitClose, ahk_id %Pid%, , 6.0
                     if ErrorLevel
                     {
                         MsgBox, Timeout: %NameOfProcess% could not be closed. Try manually.
@@ -213,7 +213,8 @@ AutomateVpnConnect:
         ; Get list of ids of all owned windows of the VpnUi dialogue
         WinGet, id, list, ahk_pid %pid% 
         ; Activate the foremost dialogue
-        WinActivate, ahk_id %id1%
+        WinActivate, ahk_id %id1%,
+        WinWaitActive, ahk_id %id1%, ,3.0
         if WinActive(DlgTitleVpnUiConnectionSuspended)
         {
             SendInput, {Enter}
@@ -231,7 +232,7 @@ AutomateVpnConnect:
     Run, C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnui.exe
     
     SetTitleMatchMode, 3
-    WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
+    WinWaitActive, %DlgTitleVpnUiMain%, ,3.0
     if WinActive(DlgTitleVpnUiMain)
     {
         ; Set keyboard focus to the control whose variable or text is "Connect".
@@ -243,7 +244,7 @@ AutomateVpnConnect:
             
             ; If VPN client password dialogue is open (found by window's title must start with given string)
             SetTitleMatchMode, 1
-            WinWaitActive, %DlgTitleVpnUiConnect%, ,25.0
+            WinWaitActive, %DlgTitleVpnUiConnect%, ,3.0
             if WinActive(DlgTitleVpnUiConnect)
             {
                 ; Check if a password has already been saved; if not ask and save it
@@ -259,15 +260,15 @@ AutomateVpnConnect:
                     SendInput, {Enter}
                     
                     SetTitleMatchMode, 3
-                    WinWaitActive, Cisco AnyConnect, ,5.0
+                    WinWaitActive, Cisco AnyConnect, ,3.0
                     if ErrorLevel = 0
                     {		
                         SendInput, {Enter}
                         
                         ; Wait until VPN connection has been fully established
                         WinActivate, %DlgTitleVpnUiMain%
-                        WinWaitActive, %DlgTitleVpnUiMain%, ,25.0
-                        WinWaitClose, %DlgTitleVpnUiMain%, ,25.0
+                        WinWaitActive, %DlgTitleVpnUiMain%, ,3.0
+                        WinWaitClose, %DlgTitleVpnUiMain%, ,3.0
                         ; Restart given application after VPN connection had been established
                         StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnConnect, IniFileKeyOnConnectStopApplications, IniFileKeyOnConnectStartApplications)
                     }
@@ -281,7 +282,7 @@ AutomateVpnDisconnect:
     ; Start VPN client, if active it will become formost window
     Run, C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnui.exe
     SetTitleMatchMode, 3
-    WinWaitActive, %DlgTitleVpnUiMain%, , 2
+    WinWaitActive, %DlgTitleVpnUiMain%, , 3.0
     
     ; Get focused element and check if it the 'Disconnect' button
     ControlGetFocus, CtrlFocused, %DlgTitleVpnUiMain%
@@ -294,7 +295,7 @@ AutomateVpnDisconnect:
             SendInput, {Enter}
         }
         ; Wait until keyboard focus is on control whose text is "Connect" -> VPN is disconnected
-        if ButtonWaitEnabled(DlgTitleVpnUiMain, Connect, 25)
+        if ButtonWaitEnabled(DlgTitleVpnUiMain, Connect, 3.0)
         {
             ; Restart given application after VPN had been disconnected
             StopStartApplicationsGivenByIniFile(ScriptName, IniFilename, IniFileSectionOnVpnDisconnect, IniFileKeyOnDisconnectStopApplications, IniFileKeyOnDisconnectStartApplications)
@@ -302,7 +303,7 @@ AutomateVpnDisconnect:
         
     }
     WinClose, %DlgTitleVpnUiMain%
-    WinWaitClose, , , 3
+    WinWaitClose, , , 3.0
 return
 
 RestartVpnConnectApplications:
